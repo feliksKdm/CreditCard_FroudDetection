@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  fraud-detection-api:
+    build: .
+    container_name: fraud-detection-api
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=production
+    volumes:
+      - ./voting_classifier_model.pkl:/app/voting_classifier_model.pkl:ro
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    networks:
+      - fraud-detection-network
+    # For production, add resource limits:
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 1G
+
+networks:
+  fraud-detection-network:
+    driver: bridge
